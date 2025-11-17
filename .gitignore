@@ -1,0 +1,24 @@
+# Cocos Creator 3.x 忽略规则
+/library
+/local
+/temp
+/build
+/.creator
+
+# 不要忽略 settings 目录下的 builder.json（如果你有自定义构建配置）
+# 但其他 settings 文件通常是本地生成的
+/settings/*
+!settings/builder.json
+
+# Node.js / npm（如果用了插件或脚本）
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 系统文件
+.DS_Store
+Thumbs.db
