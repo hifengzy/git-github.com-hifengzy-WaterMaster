@@ -28,7 +28,8 @@
   "__version__": "1.0.3",
   "builder": {},
   "tabs": [
-    "15ce3add-7990-4de1-ac4b-8edb1b2f4621"
+    "15ce3add-7990-4de1-ac4b-8edb1b2f4621",
+    "d7f25469-f9e0-4375-aceb-3d7481d9aa12"
   ],
   "snap-configs": {
     "position": {
@@ -58,5 +59,112 @@
         }
       }
     }
+  },
+  "camera-infos": {
+    "6c425f36-2a93-4378-82e6-011e5ca821fc": {
+      "position": {
+        "x": 681.0831976393206,
+        "y": 627.8335864703961,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "contentRect": {
+        "x": 250.7790677054372,
+        "y": 412.6815215034544,
+        "width": 1994,
+        "height": 1096
+      },
+      "scale": 0.6971813169585319
+    },
+    "15ce3add-7990-4de1-ac4b-8edb1b2f4621": {
+      "position": {
+        "x": 69.47383919767242,
+        "y": 617.5162432948018,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "contentRect": {
+        "x": -427.0960926600642,
+        "y": -265.27474667450775,
+        "width": 720,
+        "height": 1280
+      },
+      "scale": 0.7249734164394335
+    },
+    "d7f25469-f9e0-4375-aceb-3d7481d9aa12": {
+      "position": {
+        "x": 388.9525,
+        "y": 510.98349999999994,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "contentRect": {
+        "x": 54.24146565183449,
+        "y": 326.67421428571424,
+        "width": 1994,
+        "height": 1098
+      },
+      "scale": 2.978688772366325
+    }
+  },
+  "camera-uuids": [
+    "6c425f36-2a93-4378-82e6-011e5ca821fc",
+    "15ce3add-7990-4de1-ac4b-8edb1b2f4621",
+    "d7f25469-f9e0-4375-aceb-3d7481d9aa12"
+  ],
+  "camera": {
+    "color": [
+      48,
+      48,
+      48,
+      255
+    ],
+    "fov": 45,
+    "far": 10000,
+    "near": 0.01,
+    "wheelSpeed": 0.01,
+    "wanderSpeed": 10,
+    "enableAcceleration": true,
+    "size": "__default_design__",
+    "far2D": 10000,
+    "near2D": 1,
+    "wheelSpeed2D": 6,
+    "iso": 0,
+    "aperture": 19,
+    "shutter": 7
+  },
+  "scene_view": {
+    "isSceneLightOn": true,
+    "output_device": "__default_design__"
   }
 }
