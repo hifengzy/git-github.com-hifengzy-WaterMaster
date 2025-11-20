@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventTouch, Input, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
 import { BottlePrefab } from './BottlePrefab';
 const { ccclass, property } = _decorator;
 
@@ -34,6 +34,8 @@ export class Bottle extends Component {
         this.getWaterCountList()
         console.log(this.waterCountList)
         this.assignWaterColorToBottle()
+        // 开启瓶子触摸监听
+        this.onBottleTouch()
     }
 
     // 初始化水瓶
@@ -102,7 +104,7 @@ export class Bottle extends Component {
         // 定义一个变量，用于记录当前已经分配的颜色索引
         let currentColorIndex = 0
         // 遍历全部瓶子
-        for(let i = 0; i < this.currentBottleCount; i++){
+        for(let i = 0; i < this.currentBottleCount; i++){ // 有几个瓶子就执行几次
             // 取得每个瓶子里面有几份水
             const waterCount = this.waterCountList[i]
             // 定义一个数组，储存每个瓶子里面的颜色
@@ -113,16 +115,44 @@ export class Bottle extends Component {
                 currentColorIndex++ // 取出颜色后，索引后移一位
             }
             // 把取出来的颜色，赋值给瓶子的水
-            this.bottleList[i].getComponent(BottlePrefab).setWaterColorInit(bottleColor)
+            this.bottleList[i].getComponent(BottlePrefab).initWaterColor(bottleColor)
             console.log(bottleColor)
-        }
-        
+        }   
     }
 
+    // 瓶子触摸监听
+    onBottleTouch(){
+        // 遍历场景中的全部瓶子
+        for(let bottleNode of this.bottleList){
+            // 为每个瓶子添加触摸监听
+            bottleNode.on(Input.EventType.TOUCH_START, this.onBottleTouchStart, this)
+        }
+    }
 
+    // 关闭瓶子触摸监听
+    offBottleTouch(){
+        // 遍历场景中的全部瓶子
+        for(let bottleNode of this.bottleList){
+            // 移除每个瓶子的触摸监听
+            bottleNode.off(Input.EventType.TOUCH_START, this.onBottleTouchStart, this)
+        }
+    }
+
+    // 瓶子触摸回调
+    onBottleTouchStart(event: EventTouch){
+        const node = event.currentTarget
+        console.log('触摸到了瓶子：' + node)
+        // 调用瓶子抬起动作
+        node.getComponent(BottlePrefab).bottleUp()
+    }
 
     update(deltaTime: number) {
         
+    }
+
+    protected onDestroy(): void {
+        // 关闭瓶子触摸监听
+        this.offBottleTouch()
     }
 }
 
