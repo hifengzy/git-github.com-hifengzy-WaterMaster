@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, EventTouch, Input, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
 import { BottlePrefab } from './BottlePrefab';
+import { PourWater } from './PourWater';
 const { ccclass, property } = _decorator;
 
 // 水瓶控制脚本
@@ -140,10 +141,60 @@ export class Bottle extends Component {
 
     // 瓶子触摸回调
     onBottleTouchStart(event: EventTouch){
-        const node = event.currentTarget
+        const node = event.currentTarget // 获取当前触摸到的瓶子节点
         console.log('触摸到了瓶子：' + node)
-        // 调用瓶子抬起动作
-        node.getComponent(BottlePrefab).bottleUp()
+
+        // 点击瓶子后，先获取当前已经抬起的瓶子，如果没有返回空值
+        const movingBottleNode = this.getMovingBottle() 
+        this.setBottleUpDown(movingBottleNode, node)
+        
+    }
+
+    // 设置瓶子的抬起和落下方法
+    setBottleUpDown(movingBottleNode: Node, targetBottleNode: Node){
+        const targetBottlePrefab = targetBottleNode.getComponent(BottlePrefab)
+        const waterCount = targetBottlePrefab.getWaterCount() // 获取当前瓶子里面水的数量
+        // 如果当前没有已抬起的瓶子，则抬起当前触摸的瓶子
+        if(!movingBottleNode){
+            if(waterCount != 0){ // 如果当前瓶子里面没有水
+                targetBottlePrefab.bottleUp() // 抬起当前瓶子
+            }
+            return
+        }
+        const movingBottlePrefab = movingBottleNode.getComponent(BottlePrefab) // 这一行必须在上面 if 判断以后，因为 if 判断以后，movingBottleNode 就不可能是空值，否则走不到这里。
+        if(targetBottleNode == movingBottleNode){
+            movingBottlePrefab.bottleUp() // 放下已经抬起的瓶子
+            return
+        }
+        if(waterCount === 4){ // 如果当前瓶子里面水的数量是4，满水
+            targetBottlePrefab.bottleUp() // 抬起当前瓶子
+            movingBottlePrefab.bottleUp() // 放下已经抬起的瓶子
+            return
+        }
+        // 对比目标瓶子和已抬起瓶子的水面颜色
+        const movingBottleColor = movingBottlePrefab.getTopWaterColor() // 获取已抬起瓶子最上层水体颜色
+        const targetBottleColor = targetBottlePrefab.getTopWaterColor() // 获取目标瓶子最上层水体颜色
+        if(movingBottleColor.equals(targetBottleColor) || !targetBottleColor){ // 如果目标瓶子和已抬起瓶子的水面颜色相同，或目标瓶子是空瓶
+            console.log('倒水') // 倒水
+            this.offBottleTouch() // 关闭瓶子触摸监听
+            // 传入倒水数据，已抬起瓶子节点，目标瓶子节点，已抬起瓶子的顶层水体颜色
+            this.node.getComponent(PourWater).getPourData(movingBottleNode, targetBottleNode, movingBottleColor)
+            // 执行倒水逻辑
+            this.node.getComponent(PourWater).setPourWater()
+        }else{
+            movingBottlePrefab.bottleUp() // 放下已经抬起的瓶子
+            targetBottlePrefab.bottleUp() // 抬起当前瓶子
+        }
+    }
+
+    // 获取当前已经抬起的瓶子
+    getMovingBottle(){
+        for(let node of this.bottleList){
+            const bottleIsMoving = node.getComponent(BottlePrefab).getBottleIsMoving() // 获取瓶子抬起状态
+            if(bottleIsMoving){
+                return node // 返回当前已经抬起的瓶子节点
+            } // 如果没有发现已经抬起的瓶子，返回 null
+        }
     }
 
     update(deltaTime: number) {
@@ -156,3 +207,9 @@ export class Bottle extends Component {
     }
 }
 
+
+/**
+ * 1. 先定义一个倒水的方法
+ * 
+ * 
+ * **/

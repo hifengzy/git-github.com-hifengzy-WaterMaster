@@ -1,3 +1,4 @@
+import { PourWater } from './PourWater';
 import { _decorator, Color, Component, Node, Sprite, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -61,12 +62,65 @@ export class BottlePrefab extends Component {
         if(!this.bottleIsMoving){
             this.node.setPosition(this.node.x, this.node.y + 50, 0) // 瓶子 y 轴增加 50
             this.shadowNode.setWorldPosition(this.shadowPos.x + 15, this.shadowPos.y + 30, 0) // 阴影 y 轴增加 50
+            // 节点层级置顶
+            this.node.setSiblingIndex(this.node.parent.children.length - 1)
             this.bottleIsMoving = true
         }else{
             this.node.setPosition(this.bottlePos)
             this.shadowNode.setWorldPosition(this.shadowPos)
             this.bottleIsMoving = false
         }
+    }
+
+    // 获取当前瓶子的抬起状态
+    getBottleIsMoving(){
+        return this.bottleIsMoving
+    }
+
+    // 获取当前瓶子里面水的数量
+    getWaterCount(){
+        // 遍历子节点可见节点数，即为当前瓶子里水的数量
+        let waterCount = 0
+        for(let waterNode of this.waterNode.children){
+            if(waterNode.active){
+                waterCount++
+            }
+        }
+        return waterCount
+    }
+
+    // 获取当前瓶子最上层水体的颜色
+    getTopWaterColor(){
+        // 倒序遍历子节点，找到最后一个可见状态的子节点，并获得它的颜色属性
+        const waterNodeReverse = [...this.waterNode.children].reverse()
+        for(let node of waterNodeReverse){
+            if(node.active){
+                return node.getComponent(Sprite).color
+            }
+        }
+        return null // 如果没有可见的子节点，返回 null
+    }
+
+    // 获取当前瓶子顶层相同颜色水体的数量
+    getTopWaterCount(pourWaterColor: Color){ // 传入已抬起瓶子的顶层水的颜色
+        const waterNodeReverse = [...this.waterNode.children].reverse() 
+        let topWaterCount = 0 // 对瓶子中的水进行计数
+        for(let node of waterNodeReverse){ // 倒序遍历瓶子中的水
+            if(node.active){ // 如果有水
+                const color = node.getComponent(Sprite).color // 获取水的颜色
+                if(pourWaterColor.equals(color)){ // 如果倒入的水的颜色与被遍历的水的颜色相同
+                    topWaterCount++ // 计数+1
+                }else{
+                    return topWaterCount // 如果发现了不一样颜色的水，就返回计数
+                }
+            }
+        }
+        return topWaterCount // 如果所有水的颜色都一致，返回计数
+    }
+
+    // 隐藏影子
+    hideShadow(){
+        this.shadowNode.active = false
     }
 
 
