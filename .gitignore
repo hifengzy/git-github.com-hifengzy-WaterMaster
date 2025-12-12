@@ -3,8 +3,10 @@
 /local
 /temp
 /build
+/extensions
 /.creator
 /.qoder
+/.trae
 
 # 不要忽略 settings 目录下的 builder.json（如果你有自定义构建配置）
 # 但其他 settings 文件通常是本地生成的

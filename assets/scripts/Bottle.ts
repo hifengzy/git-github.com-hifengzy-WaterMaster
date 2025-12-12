@@ -1,6 +1,7 @@
-import { _decorator, Color, Component, EventTouch, Input, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
+import { _decorator, Color, Component, director, EventTouch, Input, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
 import { BottlePrefab } from './BottlePrefab';
 import { PourWater } from './PourWater';
+import { colorConfig, levelConfig } from './Config';
 const { ccclass, property } = _decorator;
 
 // 水瓶控制脚本
@@ -16,34 +17,51 @@ export class Bottle extends Component {
     // 定义数组，用于存储场景内的水瓶节点
     bottleList: Node[] = []
     // 定义变量，用于记录当前已创建的水瓶数量
-    currentBottleCount: number = 5
+    currentBottleCount: number = null
     // 定义数组，用于存储已创建水瓶的位置，V3类型
-    bottlePosition: Vec3[] = [v3(-100, 200), v3(100, 200), v3(-200, -70), v3(0, -70), v3(200, -70)]
+    bottlePosition: Vec3[] = null
+    // 定义数组，接受新添加的瓶子的位置
+    newBottlePosition: Vec3[] = null
 
-    // 定义3中水的颜色：红，黄，蓝
-    waterColor: Color[] = [new Color(221, 207, 26), new Color(238, 46, 46), new Color(33, 77, 244)]
+    // 定义数组，接受水的颜色
+    waterColor: Color[] = null
     // 每个水瓶有4份水，随机使用红黄蓝三种颜色，定义一个数组，用于接收场景内全部水瓶中水的颜色
     waterColorList: Color[] = []
     // 定义数组，用于储存每个瓶子中水的份数
     waterCountList: number[] = []
 
     start() {
-        // 初始化水瓶
-        this.initBottle()
-        this.getWaterColorList()
-        this.shuffleWaterColorList()
-        this.getWaterCountList()
+        
+    }
+
+    // 获取关卡数据
+    getLevelData(currentBottleCount, bottlePosition, newBottlePosition, waterColor){
+        this.currentBottleCount = currentBottleCount
+        this.bottlePosition = bottlePosition
+        this.newBottlePosition = newBottlePosition
+        this.waterColor = waterColor
+        this.init()
+    }
+
+    init(){
+        this.initBottle() // 初始化水瓶
+        this.getWaterColorList() // 将颜色列表中的颜色复制4份，赋值给 waterColorList
+        this.shuffleWaterColorList() // 随机打乱颜色列表
+        this.getWaterCountList() // 指定每个瓶子中水的份水
         console.log(this.waterCountList)
-        this.assignWaterColorToBottle()
+        this.assignWaterColorToBottle() // 按照瓶子中水的份数，给瓶子分配水的颜色
+        this.checkSameColorFullBottle() // 校验同色满瓶，删除
         // 开启瓶子触摸监听
         this.onBottleTouch()
+        // 监听倒水完成事件
+        director.on('倒水完成', this.onBottleTouch, this)
     }
 
     // 初始化水瓶
     initBottle() {
         for (let i = 0; i < this.currentBottleCount; i++) {
             // 实例化水瓶
-            let bottleNode = instantiate(this.bottlePrefab)
+            const bottleNode = instantiate(this.bottlePrefab)
             // 设置父节点
             bottleNode.parent = this.bottleContainer
             // 设置实例位置
@@ -51,6 +69,23 @@ export class Bottle extends Component {
             // 将实例添加到数组
             this.bottleList.push(bottleNode)
             console.log(bottleNode.position)
+        }
+    }
+
+    // 初始化后校验瓶子是否为同色满瓶，如果是则删除瓶子
+    checkSameColorFullBottle(){
+        for(let x of this.bottleList){
+            // 获取当前瓶子的顶层颜色
+            const topWaterColor = x.getComponent(BottlePrefab).getTopWaterColor()
+            if(!topWaterColor){
+                continue // 如果瓶子为空（没有颜色），跳过当前循环
+            }
+            // 如果顶层有颜色，传入该颜色，返回当前瓶子与传入颜色相同的水体数量
+            const waterCount = x.getComponent(BottlePrefab).getTopWaterCount(topWaterColor)
+            if(waterCount !== 4){ // 如果返回的数量不是4（没有满水），跳过当前循环
+                continue 
+            }
+            this.removeFullBottle(x) // 从列表中移除同色满水的瓶子
         }
     }
 
@@ -197,6 +232,56 @@ export class Bottle extends Component {
         }
     }
 
+    // 删除已满水的瓶子
+    removeFullBottle(node){
+        for(let i = 0; i < this.bottleList.length; i++){
+            if(node == this.bottleList[i]){
+                this.bottleList.splice(i, 1) // 删除已满水的瓶子
+                console.log('删除已满水的瓶子：' + node.name)
+                console.log('当前列表：' + this.bottleList.map(bottle => bottle.name))
+                return // 删除成功后，直接返回
+            }
+        }
+    }
+
+    // 增加新瓶子的功能
+    addNewBottle(){
+        if(this.newBottlePosition.length == 0){ return }
+        // 实例化一个新瓶子
+        const newBottleNode = instantiate(this.bottlePrefab)
+        // 将新瓶子追加到瓶子节点数组中
+        this.bottleList.push(newBottleNode)
+        // 设置新瓶子父节点
+        newBottleNode.parent = this.bottleContainer
+        // 设置新瓶子位置
+        newBottleNode.setPosition(this.newBottlePosition[0])
+        // 移除已经使用的新瓶子的位置
+        this.newBottlePosition.splice(0, 1)
+        // 开启瓶子监听
+        newBottleNode.on(Input.EventType.TOUCH_START, this.onBottleTouchStart, this)
+    }
+
+    // 为瓶子中的水重新分配颜色
+    resetWaterColor(){
+        // 清空颜色列表
+        this.waterColorList = []
+        // 遍历瓶子列表，获取每个瓶子当前的水体颜色
+        for(let bottle of this.bottleList){
+            // 获取当前瓶子的水体颜色
+            const waterColor: Color[] = bottle.getComponent(BottlePrefab).getWaterColor()
+            // 如果当前瓶子里面有水
+            if(waterColor.length > 0){
+                for(let color of waterColor){ // 遍历获取到单个瓶子的颜色列表
+                    this.waterColorList.push(color) // 将单个瓶子中的单个颜色添加到颜色列表中
+                }
+            }
+        }
+        this.shuffleWaterColorList() // 打乱颜色列表
+        this.getWaterCountList() // 指定每个瓶子当前的水数量列表
+        this.assignWaterColorToBottle() // 为每个瓶子分配新的颜色
+        this.checkSameColorFullBottle() // 检查是否有相同颜色的满水瓶子
+    }
+
     update(deltaTime: number) {
         
     }
@@ -204,12 +289,7 @@ export class Bottle extends Component {
     protected onDestroy(): void {
         // 关闭瓶子触摸监听
         this.offBottleTouch()
+        // 移除倒水完成事件监听
+        director.off('倒水完成', this.onBottleTouch, this)
     }
 }
-
-
-/**
- * 1. 先定义一个倒水的方法
- * 
- * 
- * **/
