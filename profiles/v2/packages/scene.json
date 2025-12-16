@@ -138,7 +138,7 @@
     "15ce3add-7990-4de1-ac4b-8edb1b2f4621": {
       "position": {
         "x": 892.0708439036466,
-        "y": 659.3865723964807,
+        "y": 659.3865723964808,
         "z": 5000
       },
       "rotation": {
@@ -153,10 +153,10 @@
         "z": 0
       },
       "contentRect": {
-        "x": -464.06747992534684,
-        "y": -87.37364804696703,
-        "width": 720,
-        "height": 1280
+        "x": 490.806244576111,
+        "y": -53.36817352768434,
+        "width": 576,
+        "height": 1024
       },
       "scale": 0.7351757431240619
     }
@@ -191,5 +191,9 @@
   "scene_view": {
     "isSceneLightOn": true,
     "output_device": "__default_design__"
+  },
+  "game-view": {
+    "scaleValue": 80,
+    "sliderValue": 39
   }
 }

@@ -263,6 +263,8 @@ export class Bottle extends Component {
 
     // 为瓶子中的水重新分配颜色
     resetWaterColor(){
+        // 播放广告
+        console.log('播放广告')
         // 清空颜色列表
         this.waterColorList = []
         // 遍历瓶子列表，获取每个瓶子当前的水体颜色
